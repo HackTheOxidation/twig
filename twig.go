@@ -1,19 +1,56 @@
 package main
 
 import (
-	"bufio"
+	"errors"
+	"flag"
 	"fmt"
-	"net"
+	"io"
+	"os"
+	"net/http"
 )
 
-func main() {
-	conn, err := net.Dial("tcp", "hacktheoxidation.xyz:80")
-	if err != nil {
-		fmt.Println("Could not connect.")
+func crashAndBurn(err error) {
+	fmt.Println(err)
+	os.Exit(-1)
+}
+
+type Options struct {
+	Url string
+	Method string
+}
+
+func readArgs() (Options, error) {
+	opts := Options {}
+
+	flag.StringVar(&opts.Url, "U", "", "Specify URL.")
+	flag.StringVar(&opts.Method, "m", "GET", "Speci")
+
+	flag.Parse()
+
+	if !flag.Parsed() {
+		return opts, errors.New("Flags could not be parsed.")
 	}
 
-	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
-	status, err := bufio.NewReader(conn).ReadString('\n')
+	if opts.Url == "" {
+		return opts, errors.New("No URL supplied.")
+	}
+	
+	return opts, nil
+}
 
-	fmt.Printf("Status: %s\n", status)
+func main() {
+	opts, err := readArgs()
+
+	crashAndBurn(err)
+	
+	resp, err := http.Get(opts.Url)
+
+	crashAndBurn(err)
+
+	fmt.Printf("Status: %s\n", resp.Status)
+	
+	body, err := io.ReadAll(resp.Body)
+	content := string(body[:])
+
+	fmt.Printf("Content: %s\n", content)
 }
