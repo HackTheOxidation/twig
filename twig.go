@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"codeberg.org/HackTheOxidation/twig/options"
 )
 
 func crashAndBurn(err error) {
@@ -15,72 +16,6 @@ func crashAndBurn(err error) {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
-}
-
-type Options struct {
-	Url    string
-	Method string
-	Unsafe bool
-	Output string
-}
-
-func (opts *Options) Print() {
-	fmt.Printf("Options: { \n\tURL: %s, ", opts.Url)
-	fmt.Printf("\n\tMethod: %s, ", opts.Method)
-	fmt.Printf("\n\tUnsafe: %t, ", opts.Unsafe)
-	fmt.Printf("\n\tOutput: %s\n}\n", opts.Output)
-}
-
-func parseOutput(opts *Options) {
-	if opts.Output == "" {
-		if strings.Contains(opts.Url, "/") {
-			opts.Output = strings.SplitN(opts.Url, "/", 1)[1]
-		} else {
-			opts.Output = "index.html"
-		}
-	}
-}
-
-func readArgs() (Options, error) {
-	opts := Options{}
-
-	flag.StringVar(&(opts.Output), "o", "", "Specify output file name.")
-	flag.StringVar(&(opts.Method), "m", "GET", "Specify HTTP method.")
-	flag.BoolVar(&(opts.Unsafe), "unsafe", false, "Specify security of the connection.")
-
-	flag.Parse()
-
-	if !flag.Parsed() {
-		return opts, errors.New("twig: ERROR - Flags could not be parsed.")
-	}
-
-	opts.Url = flag.Arg(0)
-
-	if opts.Url == "" {
-		return opts, errors.New("twig: ERROR - No URL supplied.")
-	}
-
-	parseOutput(&opts)
-
-	return opts, nil
-}
-
-func ensureProtocol(opts *Options) {
-	if !strings.Contains(opts.Url, "http") {
-		if opts.Unsafe {
-			opts.Url = "http://" + opts.Url
-		} else {
-			opts.Url = "https://" + opts.Url
-		}
-	}
-}
-
-func getOptions() Options {
-	opts, err := readArgs()
-	crashAndBurn(err)
-	ensureProtocol(&opts)
-
-	return opts
 }
 
 func writeOutputToFile(content *string, filename string) {
@@ -94,7 +29,7 @@ func writeOutputToFile(content *string, filename string) {
 	crashAndBurn(err)
 }
 
-func handleGET(resp *http.Response, opts *Options) {
+func handleGET(resp *http.Response, opts *options.Options) {
 	if resp.StatusCode != 200 {
 		crashAndBurn(errors.New("twig: unsuccessful request - received response with status: " + resp.Status))
 	}
@@ -109,7 +44,7 @@ func handleGET(resp *http.Response, opts *Options) {
 	}
 }
 
-func dispatchAndExecute(opts *Options) {
+func dispatchAndExecute(opts *options.Options) {
 	var resp *http.Response
 	var err error
 
@@ -124,6 +59,6 @@ func dispatchAndExecute(opts *Options) {
 }
 
 func main() {
-	opts := getOptions()
+	opts := options.GetOptions()
 	dispatchAndExecute(&opts)
 }
