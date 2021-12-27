@@ -49,17 +49,29 @@ func (opts *Options) ensureProtocol() {
 	}
 }
 
+func displayHelp() {
+	fmt.Println("Usage: twig <options> [url]")
+	fmt.Println("\noptions:")
+	flag.PrintDefaults()
+	os.Exit(0)
+}
+
 func readArgs() (Options, error) {
 	opts := Options{}
 
 	flag.StringVar(&(opts.Output), "o", "", "Specify output file name.")
 	flag.StringVar(&(opts.Method), "m", "GET", "Specify HTTP method.")
-	flag.BoolVar(&(opts.Unsafe), "unsafe", false, "Specify security of the connection.")
+	flag.BoolVar(&(opts.Unsafe), "u", false, "Specify security of the connection.")
+	help := flag.Bool("h", false, "Display help information.")
 
 	flag.Parse()
 
 	if !flag.Parsed() {
 		return opts, errors.New("twig: ERROR - Flags could not be parsed.")
+	}
+
+	if *help {
+		displayHelp()
 	}
 
 	opts.Url = flag.Arg(0)
