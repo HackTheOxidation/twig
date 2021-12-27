@@ -20,13 +20,15 @@ type Options struct {
 	Method string
 	Unsafe bool
 	Output string
+	Content string
 }
 
 func (opts *Options) Print() {
 	fmt.Printf("Options: { \n\tURL: %s, ", opts.Url)
 	fmt.Printf("\n\tMethod: %s, ", opts.Method)
 	fmt.Printf("\n\tUnsafe: %t, ", opts.Unsafe)
-	fmt.Printf("\n\tOutput: %s\n}\n", opts.Output)
+	fmt.Printf("\n\tOutput: %s, ", opts.Output)
+	fmt.Printf("\n\tContent: %s\n}\n", opts.Content)
 }
 
 func (opts *Options) ensureOutput() {
@@ -62,6 +64,7 @@ func readArgs() (Options, error) {
 	flag.StringVar(&(opts.Output), "o", "", "Specify output file name.")
 	flag.StringVar(&(opts.Method), "m", "GET", "Specify HTTP method.")
 	flag.BoolVar(&(opts.Unsafe), "u", false, "Specify security of the connection.")
+	flag.StringVar(&(opts.Content), "c", "", "Specify request content.")
 	help := flag.Bool("h", false, "Display help information.")
 
 	flag.Parse()

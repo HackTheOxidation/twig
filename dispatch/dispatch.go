@@ -1,7 +1,9 @@
 package dispatch
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -30,7 +32,10 @@ func writeOutputToFile(content *string, filename string) {
 	crashAndBurn(err)
 }
 
-func handleGET(resp *http.Response, opts *options.Options) {
+func handleGET(client *http.Client, opts *options.Options) {
+	resp, err := client.Get(opts.Url)
+	crashAndBurn(err)
+
 	if resp.StatusCode != 200 {
 		crashAndBurn(errors.New("twig: unsuccessful request - received response with status: " + resp.Status))
 	}
@@ -45,6 +50,20 @@ func handleGET(resp *http.Response, opts *options.Options) {
 	}
 }
 
+func handlePOST(opts *options.Options, client *http.Client) {
+	if opts.Content == "" {
+		crashAndBurn(errors.New("twig: ERROR - Content cannot be empty when using method: POST"))
+	}
+
+	payload, err := json.Marshal(opts.Content)
+	crashAndBurn(err)
+
+	resp, err := client.Post(opts.Url, "application/json", bytes.NewBuffer(payload))
+	crashAndBurn(err)
+
+	fmt.Println("twig: Received response with status: ", resp.Status)
+}
+
 func createConfiguredClient() *http.Client {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -54,15 +73,13 @@ func createConfiguredClient() *http.Client {
 }
 
 func DispatchAndExecute(opts *options.Options) {
-	var resp *http.Response
-	var err error
 	client := createConfiguredClient()
 
 	switch strings.ToUpper(opts.Method) {
 	case "GET":
-		resp, err = client.Get(opts.Url)
-		crashAndBurn(err)
-		handleGET(resp, opts)
+		handleGET(client, opts)
+	case "POST":
+		handlePOST(opts, client)
 	default:
 		crashAndBurn(errors.New("twig: ERROR - Unrecognized method: " + opts.Method))
 	}
