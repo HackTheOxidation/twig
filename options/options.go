@@ -34,7 +34,8 @@ func (opts *Options) Print() {
 func (opts *Options) ensureOutput() {
 	if opts.Output == "" {
 		if strings.Contains(opts.Url, "/") {
-			opts.Output = strings.SplitN(opts.Url, "/", 1)[1]
+			split_url := strings.Split(opts.Url, "/")
+			opts.Output = split_url[len(split_url) - 1]
 		} else {
 			opts.Output = "index.html"
 		}
