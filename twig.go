@@ -1,8 +1,10 @@
 package main
 
 import (
-	"codeberg.org/HackTheOxidation/twig/dispatch"
-	"codeberg.org/HackTheOxidation/twig/options"
+	//"codeberg.org/HackTheOxidation/twig/dispatch"
+	//"codeberg.org/HackTheOxidation/twig/options"
+	"dispatch"
+	"options"
 )
 
 func main() {
