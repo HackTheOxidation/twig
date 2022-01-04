@@ -72,7 +72,7 @@ func handlePUT(opts *options.Options, client *http.Client) {
 	payload, err := json.Marshal(opts.Content)
 	crashAndBurn(err)
 
-	req, err := http.NewRequest(opts.Method, opts.Url, bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPut, opts.Url, bytes.NewBuffer(payload))
 	crashAndBurn(err)
 
 	resp, err := client.Do(req)
@@ -85,7 +85,7 @@ func handleDELETE(opts *options.Options, client *http.Client) {
 	payload, err := json.Marshal(opts.Content)
 	crashAndBurn(err)
 
-	req, err := http.NewRequest(opts.Method, opts.Url, bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodDelete, opts.Url, bytes.NewBuffer(payload))
 	crashAndBurn(err)
 
 	resp, err := client.Do(req)
