@@ -31,17 +31,6 @@ func (opts *Options) Print() {
 	fmt.Printf("\n\tContent: %s\n}\n", opts.Content)
 }
 
-func (opts *Options) ensureOutput() {
-	if opts.Output == "" {
-		if strings.Contains(opts.Url, "/") {
-			split_url := strings.Split(opts.Url, "/")
-			opts.Output = split_url[len(split_url) - 1]
-		} else {
-			opts.Output = "index.html"
-		}
-	}
-}
-
 func (opts *Options) ensureProtocol() {
 	if !strings.Contains(opts.Url, "http") {
 		if opts.Unsafe {
@@ -83,8 +72,6 @@ func readArgs() (Options, error) {
 	if opts.Url == "" {
 		return opts, errors.New("twig: ERROR - No URL supplied.")
 	}
-
-	opts.ensureOutput()
 
 	return opts, nil
 }
